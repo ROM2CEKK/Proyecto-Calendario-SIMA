@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main_styles.css">
+    <title>Calendario Académico</title>
+</head>
+<body>
+    <header class="header">
+        <input type="checkbox" class="header__checkbox" id="open-menu">
+        <label for="open-menu" class="header_open-nav-button" role="button"> &#9776; </label>
+        
+        <nav class="nav__list-first">
+            <ul class="list-first__item">   
+                <li><button class="item__button" data-section="home">INICIO</button></li>
+                <li><button class="item__button" data-section="calendar">CALENDARIO</button></li>
+                <li><button class="item__button" data-section="admin" id="adminBtn">ADMIN</button></li>
+                <li><a href="crear_eventos.html" class="item__button">CREAR EVENTO</a></li>
+                <li><button class="item__button" id="logoutBtn">SALIR</button></li>
+            </ul>
+        </nav>
+
+        <h1 id="headerTitle">CALENDARIO ACADÉMICO</h1>
+
+        <nav class="nav__list-second">
+            <ul class="list-second__item">
+                <li><button class="item__button filter-btn" data-type="todos">Todos los Eventos</button></li>
+                <li><button class="item__button filter-btn" data-type="facultativos">Eventos Facultativos</button></li>
+                <li><button class="item__button filter-btn" data-type="universitarios">Eventos Universitarios</button></li>
+                <li><button class="item__button" onclick="CalendarioManager.mostrarContenido('sociedad')">Seminario</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main">
+        <!-- Sección Inicio -->
+        <div id="home" class="main__contenido active-section">
+            <h2 class="contenido__title" id="welcomeMessage">
+                BIENVENIDO <br> A EVENTOS CIMA <br>
+            </h2>
+        </div>
+
+        <!-- Sección Calendario -->
+        <div id="calendar" class="calendar-section" style="display: none;">
+            <div class="calendar-controls">
+                <button onclick="CalendarioManager.previousMonth()">‹ Mes Anterior</button>
+                <h3 id="currentMonth">Mes Actual</h3>
+                <button onclick="CalendarioManager.nextMonth()">Mes Siguiente ›</button>
+            </div>
+            
+            <div class="calendar-header">
+                <div>Domingo</div><div>Lunes</div><div>Martes</div><div>Miércoles</div><div>Jueves</div><div>Viernes</div><div>Sábado</div>
+            </div>
+            <div class="calendar" id="calendarGrid">
+                <!-- El calendario se genera aqui -->
+            </div>
+
+            <!-- Sección para Estudiantes -->
+            <div class="registrations-section" id="studentRegistrations" style="display: none;">
+                <h3>Mis Inscripciones</h3>
+                <div id="registrationsList">
+                    <!-- Las inscripciones se cargan aqui -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección Administrador -->
+        <div id="admin" class="admin-section" style="display: none;">
+            <h2>Panel de Administración</h2>
+            <div class="user-management">
+                <h3>Gestión de Usuarios</h3>
+                <div id="userForm">
+                    <input type="email" id="newUserEmail" placeholder="Correo institucional">
+                    <input type="password" id="newUserPassword" placeholder="Contraseña">
+                    <select id="newUserType">
+                        <option value="admin">Administrador</option>
+                        <option value="student">Estudiante</option>
+                    </select>
+                    <button class="btn-primary" onclick="CalendarioManager.createUser()">Crear Usuario</button>
+                </div>
+                <div id="usersList" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>Sistema del CIMA</p>
+    </footer>
+
+    <!-- Carga única de scripts -->
+    <script src="api.js"></script>
+    <script src="calendario.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("✅ main_windows.html cargado");
+
+        if (window.apiLoaded) {
+            console.warn("⚠️ api.js ya estaba cargado");
+            return;
+        }
+        window.apiLoaded = true;
+
+        // Verificar autenticación
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'Login.html';
+            return;
+        }
+
+        // Mensaje de bienvenida
+        const userEmail = localStorage.getItem('userEmail');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        if (welcomeMessage) {
+            welcomeMessage.innerHTML = `BIENVENIDO <br> ${userEmail} <br> A EVENTOS CIMA`;
+        }
+
+        // Ocultar botón "Crear Evento" si es estudiante
+        const userType = localStorage.getItem('userType');
+        const crearEventoBtn = document.querySelector('a[href="crear_eventos.html"]');
+        if (userType === 'student' && crearEventoBtn) {
+            crearEventoBtn.style.display = 'none';
+            console.log("✅ Botón 'Crear Evento' oculto para estudiante");
+        }
+
+        // Navegación entre secciones
+        document.querySelectorAll('.list-first__item .item__button[data-section]').forEach(button => {
+            button.addEventListener('click', function() {
+                const sectionId = this.getAttribute('data-section');
+                CalendarioManager.showSection(sectionId);
+            });
+        });
+
+        // Filtros de eventos
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const type = this.getAttribute('data-type');
+                CalendarioManager.filterEvents(type);
+            });
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            CalendarioManager.logout();
+        });
+
+        // Inicializar calendario
+        CalendarioManager.init();
+        CalendarioManager.showSection('home');
+    });
+    </script>
+</body>
+</html>

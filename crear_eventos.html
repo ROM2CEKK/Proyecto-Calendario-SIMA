@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Eventos_Styles.css">
+    <title>Crear Evento</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Crear Nuevo Evento</h1>
+        <form id="eventoForm" enctype="multipart/form-data">
+            <!-- Cambiado a organizador_id para coincidir con BD -->
+            <label class="item--label" for="organizador_id">Organizador ID:</label>
+            <input class="conteiner--item item__input" type="number" id="organizador_id" name="organizador_id" value="1" required>
+
+            <label class="item--label" for="nombre_evento">Nombre del Evento:</label>
+            <input class="conteiner--item item__input" type="text" id="nombre_evento" name="nombre_evento" required>
+
+            <label class="item--label" for="fecha_hora">Fecha y Hora:</label>
+            <input class="conteiner--item item__input" type="datetime-local" id="fecha_hora" name="fecha_hora" required>
+
+            <label class="item--label" for="lugar">Lugar:</label>
+            <input class="conteiner--item item__input" type="text" id="lugar" name="lugar">
+
+            <label class="item--label" for="descripcion_corta">Descripción Corta:</label>
+            <input class="conteiner--item item__input" type="text" id="descripcion_corta" name="descripcion_corta">
+
+            <label class="item--label" for="descripcion_larga">Descripción Larga:</label>
+            <textarea class="conteiner--item item__textarea" id="descripcion_larga" name="descripcion_larga"></textarea>
+
+            <label class="item--label" for="cupos">Cupos:</label>
+            <input class="conteiner--item item__input" type="number" id="cupos" name="cupos" min="1" value="50">
+
+            <label class="item--label" for="costo">Costo:</label>
+            <input class="conteiner--item item__input" type="number" id="costo" name="costo" step="0.01" min="0" value="0">
+
+            <label class="item--label" for="invitado">Invitado Especial:</label>
+            <input class="conteiner--item item__input" type="text" id="invitado" name="invitado">
+
+            <!-- Cambiado a estado para coincidir con BD -->
+            <label class="item--label" for="estado">Estado del Evento:</label>
+            <select class="conteiner--item item__select" name="estado" id="estado">
+                <option value="activo">Activo</option>
+                <option value="cancelado">Cancelado</option>
+                <option value="finalizado">Finalizado</option>
+                <option value="programado">Programado</option>
+            </select>
+
+            <!-- Cambiado a tipo_evento para coincidir con BD -->
+            <label class="item--label" for="tipo_evento">Tipo de Evento:</label>
+            <select class="conteiner--item item__select" name="tipo_evento" id="tipo_evento">
+                <option value="1">Conferencia</option>
+                <option value="2">Taller</option>
+                <option value="3">Seminario</option>
+                <option value="4">Evento Cultural</option>
+            </select>
+
+            <label class="item--label" for="imagen_url">Imagen del Evento:</label>
+            <div class="conteiner--item item__image-upload">
+                <input class="conteiner--item item__url" type="text" id="imagen_url" name="imagen_url" 
+                placeholder="Pega la URL de la imagen o arrastra un archivo aquí">
+                <input class="item__file" type="file" id="imagen_file" name="imagen_file" accept="image/*">
+                <div id="preview" class="image__preview"></div>
+            </div>
+
+            <button class="conteiner--item item__button" type="submit">Crear Evento</button>
+        </form>
+
+        <div id="mensaje"></div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="main_windows.html" style="color: #007bff; text-decoration: none;">← Volver al Calendario</a>
+        </div>
+    </div>
+
+    <!-- Incluir los archivos JS en el orden correcto -->
+    <script src="js/api.js"></script>
+    <script src="js/eventos.js"></script>
+    
+    <script>
+        // Verificar autenticación
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!localStorage.getItem('isLoggedIn')) {
+                window.location.href = 'Login.html';
+                return;
+            }
+            
+            // Establecer organizador_id automáticamente si es posible
+            const userId = localStorage.getItem('userId');
+            if (userId) {
+                document.getElementById('organizador_id').value = userId.replace('user-', '');
+            }
+        });
+    </script>
+    <script src="api.js"></script>
+    <script src="crear_eventos.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("✅ crear_eventos.html cargado");
+            console.log("EventosAPI disponible:", typeof EventosAPI !== 'undefined');
+            
+            if (typeof EventosAPI === 'undefined') {
+                console.error("❌ EventosAPI no está definido");
+            }
+        });
+    </script>
+</body>
+</html>
