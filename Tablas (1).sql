@@ -1,76 +1,61 @@
--- Organizador
-CREATE TABLE organizador (
-    id_organizador SERIAL PRIMARY KEY,
+-- Usuarios 
+CREATE TABLE usuarios (
+    id_usuario SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
-    organizacion VARCHAR(150)
+    email VARCHAR(150) UNIQUE NOT NULL,
+    telefono VARCHAR(20),
+    es_organizador BOOLEAN DEFAULT FALSE,
+    organizacion VARCHAR(150),
+    usuario VARCHAR(100) UNIQUE,
+    password_hash TEXT,
+    rol VARCHAR(20) DEFAULT 'participante',
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Estado evento
-CREATE TABLE estado_evento (
-    id SERIAL PRIMARY KEY,
-    estado VARCHAR(50) UNIQUE NOT NULL
-);
-
--- Tipo de evento
-CREATE TABLE tipo_evento(
-	id SERIAL PRIMARY KEY,
-	tipo VARCHAR(255) UNIQUE NOT NULL
-);
-
--- Evento
+-- Evento 
 CREATE TABLE evento (
     id_evento SERIAL PRIMARY KEY,
-    id_organizador INT NOT NULL REFERENCES organizador(id_organizador) ON DELETE CASCADE,
+    organizador_id INT NOT NULL REFERENCES usuarios(id_usuario),
     nombre_evento VARCHAR(150) NOT NULL,
     fecha_hora TIMESTAMP NOT NULL,
     lugar VARCHAR(150),
     descripcion_corta VARCHAR(255),
     descripcion_larga TEXT,
     cupos INT CHECK (cupos >= 0),
+    cupos_disponibles INT CHECK (cupos_disponibles >= 0),
     costo NUMERIC(10,2) DEFAULT 0,
     invitado VARCHAR(100),
-    id_estado INT REFERENCES estado_evento(id) ON DELETE SET NULL,
-	id_tipo INT REFERENCES tipo_evento(id) ON DELETE SET NULL,
-    imagen_url VARCHAR(255) 
-	-- imagen_url es para agregar imagenes (posters o asi)
-	-- asi sera mas facil en caso de que quieran agregar imagenes
+    estado VARCHAR(20) DEFAULT 'activo',
+    tipo_evento VARCHAR(50) DEFAULT 'general',
+    imagen_url VARCHAR(255),
+    organizador_nombre VARCHAR(100),
+    total_participantes INT DEFAULT 0,
+    total_recaudado NUMERIC(12,2) DEFAULT 0,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Participante
 CREATE TABLE participante (
     id_participante SERIAL PRIMARY KEY,
+    usuario_id INT REFERENCES usuarios(id_usuario),
     nombre VARCHAR(100) NOT NULL,
     telefono VARCHAR(20),
     correo VARCHAR(150) UNIQUE,
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Estado participacion 
-CREATE TABLE estado_participacion (
-	id SERIAL PRIMARY KEY,
-	estado varchar(255) UNIQUE NOT NULL
-);
-
--- Asiste (relación evento:participante)
+-- Asiste
 CREATE TABLE asiste (
-    id_evento INT REFERENCES evento(id_evento) ON DELETE CASCADE,
-    id_participante INT REFERENCES participante(id_participante) ON DELETE CASCADE,
-    id_estado_participacion INT REFERENCES estado_participacion(id) ON DELETE CASCADE,
-	pago NUMERIC(10,2) DEFAULT 0,
-    PRIMARY KEY (id_evento, id_participante)
-);
-
--- Login tipo usuario
-CREATE TABLE tipo_usuario (
-	id_rol SERIAL PRIMARY KEY,
-	nombre VARCHAR(50) UNIQUE NOT NULL
-);
-
--- Login
-CREATE TABLE login (
-    id SERIAL PRIMARY KEY,
-    usuario VARCHAR(100) UNIQUE NOT NULL,
-	correo VARCHAR(100),
-    password_hash TEXT NOT NULL,
-	id_rol INT REFERENCES tipo_usuario(id_rol)
+    evento_id INT REFERENCES evento(id_evento),
+    participante_id INT REFERENCES participante(id_participante),
+    estado_participacion VARCHAR(20) DEFAULT 'confirmado',
+    pago NUMERIC(10,2) DEFAULT 0,
+    metodo_pago VARCHAR(50),
+    participante_nombre VARCHAR(100),
+    participante_correo VARCHAR(150),
+    evento_nombre VARCHAR(150),
+    evento_fecha TIMESTAMP,
+    fecha_inscripcion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (evento_id, participante_id)
 );
